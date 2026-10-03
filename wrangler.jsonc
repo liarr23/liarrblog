@@ -1,0 +1,13 @@
+{
+  // Cloudflare Workers 静态资源托管配置
+  // 纯静态站点：不要加 "main"（Worker 脚本入口），也不要加 assets 的 "binding"
+  "name": "liarrblog",
+  "compatibility_date": "2026-10-03",
+  "assets": {
+    // Hexo 的构建输出目录
+    "directory": "./public",
+    // 未命中时返回 404.html（Hexo 主题通常自带），而不是裸 404
+    "not_found_handling": "404-page"
+    // html_handling 保持默认 auto-trailing-slash，正好匹配 Hexo 的 post/xxx/index.html
+  }
+}
