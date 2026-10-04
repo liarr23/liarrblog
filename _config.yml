@@ -105,3 +105,7 @@ deploy:
   type: git
   repo: https://github.com/liarr23/liarrblog.git
   branch: gh-pages
+search:
+  path: search.xml
+  field: post
+  content: true
