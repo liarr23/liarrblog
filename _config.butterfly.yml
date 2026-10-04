@@ -473,7 +473,7 @@ math:
     copy_tex: false
 
 # --------------------------------------
-use: local_search
+search.use: local_search
 # --------------------------------------
 
 search:
