@@ -1139,3 +1139,21 @@ CDN:
     # valine:
     # waline_css:
     # waline_js:
+
+# --------------------------------------
+# Theme Color / 全站强调色
+# --------------------------------------
+# 注意：颜色值必须用双引号包裹，否则 Stylus 编译会报错。
+# 未显式指定的键会各自回落到内置默认色（link_color/hr_color 回落蓝、paginator/toc_color 回落青色 #00c4b6、button_hover 回落橙），
+# 所以哪怕只想换主色，这几项也要一起写，否则会残留杂色。
+theme_color:
+  enable: true
+  main: "#8846A5"                        # 主色：页脚、按钮、标签、搜索高亮（取横幅两端 #A63C86 与 #6A4FC4 的中间调）
+  paginator: "#A75BC4"                   # 分页器（默认青色 #00c4b6，必须改）
+  button_hover: "#B85CC7"                # 按钮悬停（默认橙色，必须改）
+  text_selection: "#A75BC4"              # 文字选中背景
+  link_color: "#8846A5"                  # 正文链接（默认蓝色，必须改）
+  hr_color: "#D9B8E8"                    # 分隔线（默认蓝色，必须改）
+  toc_color: "#A75BC4"                   # 目录高亮（默认青色，必须改）
+  blockquote_padding_color: "#8846A5"    # 引用块左边框（默认蓝色，必须改）
+  blockquote_background_color: "#8846A5" # 引用块背景（默认蓝色，必须改）
