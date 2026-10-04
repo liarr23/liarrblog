@@ -151,7 +151,7 @@ index_top_img_height:
 
 # The subtitle on homepage
 subtitle:
-  enable: false
+  enable: true
   # Typewriter Effect
   effect: true
   # Customize typed.js
@@ -167,6 +167,9 @@ subtitle:
   source: false
   # If you close the typewriter effect, the subtitle will only show the first line of sub
   sub:
+    - 记录学习与思考
+    - 一个 CS 学生的随笔
+    - 慢慢来，比较快
 
 # Article layout on the homepage
 # 1: Cover on the left, info on the right
@@ -286,15 +289,15 @@ aside:
     category: true
   card_author:
     enable: true
-    description:
+    description: NEU 计算机科学与技术在读
     button:
       enable: true
       icon: fab fa-github
-      text: Follow Me
+      text: GitHub
       link: https://github.com/liarr23
   card_announcement:
     enable: true
-    content: This is my Blog
+    content: '你好，欢迎来到我的小站。这里记录我在 CS 路上的学习笔记、踩坑记录和一些随笔。'
   card_recent_post:
     enable: true
     # If set 0 will show all
