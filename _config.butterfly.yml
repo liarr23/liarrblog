@@ -46,8 +46,10 @@ code_blocks:
 # Formal:
 #   icon: link || the description || color
 social:
-  # fab fa-github: https://github.com/xxxxx || Github || '#24292e'
-  # fas fa-envelope: mailto:xxxxxx@gmail.com || Email || '#4a7dbe'
+  fab fa-github: https://github.com/liarr23 || Github || '#24292e'
+  fas fa-envelope: mailto:xzx070323@gmail.com || Email || '#4a7dbe'
+  fab fa-qq: https://wpa.qq.com/msgrd?v=3&uin=2145205153&site=qq&menu=yes || QQ || '#12B7F5'
+  fab fa-bilibili: https://space.bilibili.com/485750786 || Bilibili || '#00A1D6'
 
 # --------------------------------------
 # Image Settings
@@ -56,7 +58,7 @@ social:
 favicon: /img/favicon.ico
 
 avatar:
-  img: /img/butterfly-icon.png
+  img: /img/avatar.jpg
   effect: false
 
 # Disable all banner images
