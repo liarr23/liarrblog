@@ -18,4 +18,105 @@ Deploy to remote sites$ hexo deploy
 More info: Deployment
 ]]></content>
   </entry>
+  <entry>
+    <title>Hexo 博客搭建踩坑记录：一个新手和 AI 的协作实录</title>
+    <url>/liarrblog/2026/10/05/Hexo-%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95/</url>
+    <content><![CDATA[前言本文写于国庆假期，洞b大学某宿舍内，一个学了一年计算机虽然并没有学到啥的大学生灵机一动想要搞个博客网站玩玩他只会点C语言，做题出生的没部署过服务器，也没系统学习过前后端只是，对于html，javascript等也只停留在知道作用与概念的状态，于是他打开他过去一年近乎唯一的生产力工具dsh，感谢梁圣给的6元鲸元券，想要得到上线个人博客的方法：hexo+Cloudflare workers &amp; pages,但妥协于安全限制最后转向使用hexo+github pages,也就是你们现在看这篇文章的地方，好处是0成本(token不算的情况下),免备案，大陆可以正常访问，又加上搜索板块，评论以及数学公式显示功能写这篇blog的缘由在于记录我在本次vibe部署中碰到的一些问题并非想要写一篇教程，希望在之后有想要部署此类个人博客网站的读者能少踩点坑注意：本人设备运行的是windows，可能并不适合所有人
+
+一、环境与工具链1.1 PowerShell 禁止运行脚本现象：装命令行工具时直接报错，很容易误判成”Node 装坏了”。
+原始报错（实测）：
+npm : 无法加载文件 C:\Program Files\nodejs\npm.ps1，因为在此系统上禁止运行脚本。    + CategoryInfo          : SecurityError: (:) [], PSSecurityException
+
+解法：
+npm.cmd install -g hexo-cli     # 加 .cmd 后缀绕过
+
+在确定好了我的个人博客的技术栈之后，我在powershell中输入对应文件下载脚本，一大串报错信息弹了出来。欸，奇怪，先前我在cmd里直接复制粘贴各种npm脚本都能正常运行，怎么到powershell就又出问题了挨千刀的powershell，让dsh扫了一遍本地环境，输入npm.cmd --version能正确输出，node.js也是正常安装好了，为什么会行不通：上网查询后得知在powershell里输入npm会优先命中npm.ps1，而powershell禁用了.ps1的后缀，解决方式就是在npm后面加上.cmd，后面在安装完hexo框架后输入hexo的命令报错也是使用同款方法解决  
+留给读者的坑：hexo 命令是同样的 .ps1 包装，所以后面所有命令都得写 hexo.cmd。
+1.2 hexo init 要求空目录原始报错（源码里的硬检查）：
+target not empty, please run `hexo init` on an empty folder and then copy your files into it
+
+解法：把已有文件挪到博客目录外面再初始化。
+根据我找到的教程所述，我应该在hexo框架下载完之后就找个文件夹初始下，我就兴冲冲地把工作目录切换到了先前心血来潮用来练html语法的文件夹,随着hexo.cmd init的输入，毫无意外，又报错了：target not empty, please run hexo init on an empty folder and then copy your files into it，意味着想要初始化这个hexo项目必须要“打扫干净屋子再请客”，类似于C语言里指针管理，要尽量避免野指针出现才能做好内存管理，于是我将里面练手用的html文件挪了出去，这才初始化成功。(在项目文件夹内部再新建文件夹放这个文件没用，因为有了这个文件夹项目文件夹依旧非空)  
+1.3 hexo init 只能执行一次（我把自己的站点当成了垃圾文件）现象：初始化成功后再跑一次 hexo init .，报 not empty。
+在遇到过文件夹非空事件后，我明白了初始化需要文件夹清空，但是一个不小心，输入了两次hexo.cmd init文件夹非空的警告又一次弹了出来，我点开文件夹查看:source/,themes\各类文件夹，当时就以为是dsh往里塞了啥agent的文件，后来才知道是已经初始化成功的hexo框架自身产生的文件由此可知，文件夹非空这条警告本身就有误导性，他只告诉文件夹没空，但不告诉你非空是因为什么，非空可能是有别的垃圾文件，也可能是初始化过了  
+1.4 npm 和 pnpm 混用原始报错：
+npm error Cannot read properties of null (reading &#x27;matches&#x27;)
+
+证据：node_modules/hexo 是 Junction 符号链接（pnpm 的链接式布局），且目录里只有 pnpm-lock.yaml、没有 package-lock.json。
+我的电脑上同时安装了npm和pnpm(因为dsh插件在安装时用到了)，这就导致了npm与pnpm混用的毛病，鉴于网络上的教程基本都是npm下的教程，所以我选择统一到npm这个问题才得以解决  
+
+二、部署平台2.1 免费二级域名在大陆基本都被墙实测数据：
+
+
+
+域名
+解析结果
+TCP 443
+
+
+
+cloudflare.com
+104.16.132/133.229（真实 CF IP）
+✅
+
+
+liarrblog.xxx.workers.dev
+31.13.85.2（Facebook 的 IP 段）
+❌
+
+
+vercel.com
+真实 IP
+✅
+
+
+vercel.app
+199.59.148.209（Twitter 的 IP 段）
+❌
+
+
+github.io
+185.199.108~111.153（GitHub Pages 官方 IP）
+✅
+
+
+推理（这节的核心）：vercel.com 和 *.vercel.app 跑在同一家公司、同一批服务器上。如果封的是 IP，主站会一起挂。主站全都好好的 → 封的是”名字”。
+紧接着的结论：封锁机制是 DNS 污染 + SNI 阻断，两者都以域名为依据，所以换一个不在黑名单上的域名就能解决，不需要换服务器。
+在Cloudflare的workers上成功部署网站后，我在电脑上成功访问了我的博客网站，在尝试手机访问后，发现加载圈圈转得停不下来，我一时意识到肯定又被墙了，在电脑上关闭代理后，果然也无法访问，上网查询得知，cf的这些域名获取过于方便所以容易被用作不法用途，于是就被集体加入黑名单，于是我转向使用github pages所以说免费的东西不一定好用，倘若这次没有提前用正常网络环境设备访问，我就无法发现大陆无法访问.workers.dev后缀域名的事实，后续想要转向使用其他方案会有很大时间成本，要是不转就得花费两位数重金去购买域名，这就和我的0成本建站相悖了，所以事先设计方案很重要  
+2.2 为什么转向 GitHub Pages基于cloudflare workers建站后.workers.dev后缀大陆无法正常访问，我想起了身边其他同学的例子：有使用github pages建立个人小站的例子，当时手机是直接裸连进入的，同样是0成本，为防止后续浪费更多时间精力，遂已然转向使用github pages进行配置，果然，github.io后缀实测是并未被污染大陆可以正常访问  
+
+三、配置与功能3.1 YAML 扁平键：不报错，但搜索静默失效网站配置成功，可以正常访问了，于是我开始添加额外功能…搜索功能首当其冲，在添加完搜索相关的功能模块后，还需要改动配置文件，于是我遵照dsh的建议去修改_config.butterfly.yml这个配置文件，众所周知我没有任何网站配置经验，出错就在意料之内了，我往 _config.butterfly.yml 里写了一行 search.use: local_search，结果就是搜索功能没有出现，也没有报错，原因是那是一个”扁平键”，YAML 会把它读成一个名为 &quot;search.use&quot; 的顶层键；真正生效的是 search: 块里缩进的那个 use:  
+3.2 浏览量一直转圈：第三方服务挂了在dsh的帮助下设置完搜索功能后，发现侧边栏的 Unique Visitors &#x2F; Page Views 一直是转圈图标，现象十分反常，于是我直接去请求那家服务的 API 看它的返回码——实测返回 502 Bad Gateway，发现是api服务挂了，换成替代服务（Vercount），它兼容原来的元素 ID，不用改模板，于是成功显示了访问人数与次数  
+3.3 两个便宜的小知识
+Hexo 忽略以 _ 开头的文件（source/img/_banner-A.png 不会被发布）。可以拿它当”暂不发布的素材区”或私人记事本。
+favicon 指向不存在的文件：主题只有 favicon.ico，配置却写 favicon.png → 每次加载页面都产生一个 404。改成实际存在的文件名即可（PNG 图标现代浏览器都支持）。
+
+
+四、AI 帮了大忙，也错了四次实践证明，ai也并非全能哈，特别是对网络上一直在改动的东西，譬如开始尝试在cloudflare上配置workers，而询问ai给出的答案是使用pages，这显然是没有跟上cf官方主推的节奏，ai告诉我：”不对，你进的是 Workers 流程，不是 Pages”，而cf上只显示有workers，这就很恼火，搜索发现workers是现在cf的主推路线，而ai知识库大多比较老旧，所以给出了错误指示还有我运行hexo.cmd init前，ai让我在博客目录内部建_keep 暂存文件夹，但那样目录依然非空，hexo init 照样失败，暂存目录必须建在外面
+
+五、如果重来一次AI确实大大降低了像我这样的新手上手一些技术的门槛，但是与新手学习相悖的是它减少了踩坑，手搓的步骤，这对学习过程是非常有害的，譬如配置文件，命令行我是全权交给dsh给我出谋划策，我只滥竽充数充当命令的搬运者(事实上agent比我更会使用powershell，写配置文件)，结果就是只会感慨token花了多少，ai多么强大，未来工作危机云云。。。这一次与ai的协作确实让我搞明白了配置个人小站的流程，但是过程中的各种命令行指令，各种配置文件我大多数是只会点语法而没有实际实践过，倘若回回用ai不手搓就等于白干，要我再来一次，我会将在命令行的那些操作，配置文件的书写都掌握在自己手上，而ai则是退化到副驾驶位置上为我出谋划策，看报错，查教程，至于先进的懒人的功能。。。等到我会手搓了，或者能看懂了再让他来代劳吧  
+
+附：给后来者的检查清单
+ PowerShell 报「禁止运行脚本」→ 命令后面加 .cmd（npm.cmd &#x2F; hexo.cmd）
+ hexo init 报 not empty → 目标目录必须完全为空；暂存文件夹要建在目录外面
+ 又报 not empty → 先确认是不是重复初始化了（站点文件本身就是”非空”的原因）
+ 装包报 Cannot read properties of null → 检查是不是 npm 和 pnpm 混用
+ Cloudflare 创建项目时找不到「输出目录」字段 → 输出目录由仓库里的 wrangler.jsonc 决定
+ 站点部署成功但打不开 → 先查 DNS 解析出的 IP 是不是真实的（解析到 Facebook &#x2F; Twitter 的 IP 段就是被污染）
+ 页面能打开但没样式 → 查 _config.yml 里的 root 是否设成了 /仓库名/（子路径部署）
+ 改了配置却不生效、也不报错 → 先检查 YAML 的嵌套层级，是不是写成了扁平键
+ 侧边栏统计一直转圈 → 直接请求那家服务的 API 看返回码，很可能是服务挂了
+ favicon 不显示 → 检查配置里指向的文件是否真实存在
+
+]]></content>
+      <categories>
+        <category>建站</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>建站</tag>
+        <tag>踩坑</tag>
+        <tag>AI</tag>
+      </tags>
+  </entry>
 </search>
